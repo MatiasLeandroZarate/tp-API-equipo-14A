@@ -1,5 +1,6 @@
 ﻿using dominio;
 using negocio;
+using api_Productos.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,31 +29,60 @@ namespace api_Productos.Controllers
         }
 
         // POST: api/Categoria
-        public void Post([FromBody]Categoria categoria)
+        public HttpResponseMessage Post([FromBody]CategoriaDto categoria)
         {
             CategoriaNegocio negocio = new CategoriaNegocio();
             Categoria nuevo = new Categoria();
 
+            if(string.IsNullOrWhiteSpace(categoria.DescripcionCategoria))
+                return Request.CreateResponse(HttpStatusCode.BadRequest, "La descripción es obligatoria.");
+
             nuevo.DescripcionCategoria = categoria.DescripcionCategoria;
             negocio.Agregar(nuevo);
+
+            return Request.CreateResponse(HttpStatusCode.OK, "Categoría agregada correctamente.");
         }
 
         // PUT: api/Categoria/5
-        public void Put(int id, [FromBody]Categoria categoria)
+        public HttpResponseMessage Put(int id, [FromBody] CategoriaDto categoria)
         {
             CategoriaNegocio negocio = new CategoriaNegocio();
             Categoria modificar = new Categoria();
 
+            var lista = negocio.listar();
+            var Existente= lista.Find(x => x.ID == id);
+
+            if (Existente == null)
+            {
+                return Request.CreateResponse(HttpStatusCode.BadRequest, "La categoría no existe.");
+            }
+
+            if (string.IsNullOrWhiteSpace(categoria.DescripcionCategoria))
+                return Request.CreateResponse(HttpStatusCode.BadRequest, "La descripción es obligatoria.");
+
             modificar.DescripcionCategoria = categoria.DescripcionCategoria;
             modificar.ID = id;
             negocio.Modificar(modificar);
+
+            return Request.CreateResponse(HttpStatusCode.OK, "Categoría modificada correctamente.");
         }
 
         // DELETE: api/Categoria/5
-        public void Delete(int id)
+        public HttpResponseMessage Delete(int id)
         {
             CategoriaNegocio negocio = new CategoriaNegocio();
+
+            var lista = negocio.listar();
+            var Existente = lista.Find(x => x.ID == id);
+
+            if (Existente == null)
+            {
+                return Request.CreateResponse(HttpStatusCode.NotFound, "La categoría no existe.");
+            }
+
             negocio.EliminarDB(id);
+
+            return Request.CreateResponse(HttpStatusCode.OK, "Categoría eliminada correctamente.");
         }
     }
 }

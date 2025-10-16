@@ -20,9 +20,9 @@ namespace negocio
             try
             {
                 datos.setearQuery("Select ART.Id ,ART.Codigo,M.Id as IdMarca, M.Descripcion as Marca,  ART.Nombre , ART.Descripcion, ART.Precio, C.Id as IdCat ,C.Descripcion as Categoria, I.ImagenUrl from ARTICULOS as ART"
-                + " full join IMAGENES as I on ART.Id = I.IdArticulo"
-                + " full join MARCAS as M on ART.IdMarca = M.Id"
-                + " inner join CATEGORIAS as C on ART.IdCategoria = C.Id");
+                + " left join IMAGENES as I on ART.Id = I.IdArticulo"
+                + " left join MARCAS as M on ART.IdMarca = M.Id"
+                + " left join CATEGORIAS as C on ART.IdCategoria = C.Id");
                 datos.ejecutarLectura();
 
                 while (datos.Lector.Read())
@@ -33,17 +33,17 @@ namespace negocio
 
 
                     aux.ID = (int)datos.Lector["Id"];
-                    aux.CodigoArticulo = (string)datos.Lector["Codigo"];
+                    aux.CodigoArticulo = datos.Lector["Codigo"] != DBNull.Value ? (string)datos.Lector["Codigo"] : string.Empty;
 
-                    aux.Marca.ID = (int)datos.Lector["IdMarca"];
-                    aux.Marca.DescripcionMarca = (string)datos.Lector["Marca"];
+                    aux.Marca.ID = datos.Lector["IdMarca"] != DBNull.Value ? (int)datos.Lector["IdMarca"] : 0;
+                    aux.Marca.DescripcionMarca = datos.Lector["Marca"] != DBNull.Value ? (string)datos.Lector["Marca"] : string.Empty; ;
 
-                    aux.Nombre = (string)datos.Lector["Nombre"];
-                    aux.DescripcionART = (string)datos.Lector["Descripcion"];
-                    aux.Precio = (decimal)datos.Lector["Precio"];
+                    aux.Nombre = datos.Lector["Nombre"] != DBNull.Value ? (string)datos.Lector["Nombre"] : string.Empty;
+                    aux.DescripcionART = datos.Lector["Descripcion"] != DBNull.Value ? (string)datos.Lector["Descripcion"] : string.Empty;
+                    aux.Precio = datos.Lector["Precio"] != DBNull.Value ? (decimal)datos.Lector["Precio"] : 0;
 
-                    aux.Categoria.ID = (int)datos.Lector["IdCat"];
-                    aux.Categoria.DescripcionCategoria = (string)datos.Lector["Categoria"];
+                    aux.Categoria.ID = datos.Lector["IdCat"] != DBNull.Value ? (int)datos.Lector["IdCat"] : 0;
+                    aux.Categoria.DescripcionCategoria = datos.Lector["Categoria"] != DBNull.Value ? (string)datos.Lector["Categoria"] : string.Empty;
 
                     if (!(datos.Lector["ImagenUrl"] is DBNull))
                     { aux.UrlImagen = (string)datos.Lector["ImagenUrl"]; }

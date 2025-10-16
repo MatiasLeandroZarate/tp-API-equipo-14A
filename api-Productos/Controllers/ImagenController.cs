@@ -1,5 +1,6 @@
 ﻿using dominio;
 using negocio;
+using api_Productos.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -29,33 +30,85 @@ namespace api_Productos.Controllers
         }
 
         // POST: api/Imagen
-        public void Post([FromBody]Imagen imagen)
+        public HttpResponseMessage Post([FromBody]ImagenDto imagen)
         {
             ImagenNegocio negocio = new ImagenNegocio();
             Imagen nuevo = new Imagen();
 
+            ArticulosNegocio negocioArt = new ArticulosNegocio();
+            Articulos articulo = negocioArt.ListarProductos().Find(x => x.ID == imagen.IdArticulo);
+
+            if (articulo == null)
+                return Request.CreateResponse(HttpStatusCode.BadRequest, "El artículo no existe.");
+
+            var lista = negocio.Listar();
+            var Existente = lista.Find(x => x.IdArticulo == imagen.IdArticulo);
+
+
+            // EN CASO DE QUERER QUE LOS ARTíCULOS TENGAN UNA SOLA IMAGEN, HABILITAR.
+
+            //if (Existente != null)
+            //{
+            //    return Request.CreateResponse(HttpStatusCode.BadRequest, "El artículo ya tiene una imagen.");
+            //}
+
+            if (string.IsNullOrWhiteSpace(imagen.ImagenUrl))
+                return Request.CreateResponse(HttpStatusCode.BadRequest, "El URL es obligatorio.");
+
             nuevo.IdArticulo = imagen.IdArticulo;
             nuevo.ImagenUrl = imagen.ImagenUrl;
             negocio.Agregar(nuevo);
+
+            return Request.CreateResponse(HttpStatusCode.OK, "Imagen agregada correctamente.");
         }
 
         // PUT: api/Imagen/5
-        public void Put(int id, [FromBody] Imagen imagen)
+        public HttpResponseMessage Put(int id, [FromBody] ImagenDto imagen)
         {
             ImagenNegocio negocio = new ImagenNegocio();
             Imagen modificar = new Imagen();
+
+            ArticulosNegocio negocioArt = new ArticulosNegocio();
+            Articulos articulo = negocioArt.ListarProductos().Find(x => x.ID == imagen.IdArticulo);
+
+            if (articulo == null)
+                return Request.CreateResponse(HttpStatusCode.BadRequest, "El artículo no existe.");
+
+            var lista = negocio.Listar();
+            var Existente = lista.Find(x => x.ID == id);
+
+            if (Existente == null)
+            {
+                return Request.CreateResponse(HttpStatusCode.BadRequest, "La imagen no existe.");
+            }
+
+            if (string.IsNullOrWhiteSpace(imagen.ImagenUrl))
+                return Request.CreateResponse(HttpStatusCode.BadRequest, "El URL es obligatorio.");
 
             modificar.IdArticulo = imagen.IdArticulo;
             modificar.ImagenUrl = imagen.ImagenUrl;
             modificar.ID = id;
             negocio.Modificar(modificar);
+
+            return Request.CreateResponse(HttpStatusCode.OK, "Imagen modificada correctamente.");
         }
 
         // DELETE: api/Imagen/5
-        public void Delete(int id)
+        public HttpResponseMessage Delete(int id)
         {
             ImagenNegocio negocio = new ImagenNegocio();
+
+            var lista = negocio.Listar();
+            var Existente = lista.Find(x => x.ID == id);
+
+            if (Existente == null)
+            {
+                return Request.CreateResponse(HttpStatusCode.BadRequest, "La imagen no existe.");
+            }
+
             negocio.EliminarDB(id);
+
+            return Request.CreateResponse(HttpStatusCode.OK, "Imagen eliminada correctamente.");
         }
     }
 }
